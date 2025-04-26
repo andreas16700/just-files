@@ -1,10 +1,48 @@
+/* Import Tailwind's base, components, and utilities */
 @import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+
+/* Import Official Tailwind Plugins (if any) */
+@plugin '@tailwindcss/typography'; 
 
 
+/* --- Tailwind Theme Customizations --- */
+@theme {
+  --animation-mypulse: mypulse 0.2s ease-in;
+  --animate-mypulse: mypulse 0.2s ease-in;
+
+  @keyframes mypulse {
+    0% { transform: scale(1); }
+    /* Scale down to 0.97 before bouncing */
+    40% { transform: scale(0.97); }
+    50% { transform: scale(0.97); }
+    /* Overshoot slightly to create a bounce effect */
+    /* '60%': { transform: 'scale(1.03)' }, */ /* Uncomment if needed */
+    100% { transform: scale(1); }
+  }
+
+  --animate-fade-in-scale: fade-in-scale 0.3s ease-out;
+  @keyframes fade-in-scale {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+}
+
+
+/* --- Skeleton UI Imports --- */
+/* Keep your Skeleton imports as they are. Skeleton might use */
+/* its own mechanisms or PostCSS plugins for integration. */
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/cerberus';
 
+/* Source mapping for Skeleton (keep as is) */
 @source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+
+/* Add any other custom CSS rules below */

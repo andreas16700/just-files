@@ -1,16 +1,67 @@
-<script>
-    import {onMount} from 'svelte';
-    import {login} from '$lib/stores/stores.svelte'
+<script lang="ts">
+    import {onMount, onDestroy} from 'svelte';
+    import {login, loginWithToken, userContainer} from '$lib/stores/stores.svelte'
+    import {account, client, triggerSecretGen, PUBLIC_COLL_ID, RECORD_ID} from "$lib/appwrite"
+    import { page } from '$app/state';
+    import {PublicDocStore} from "$lib/stores/SingleDocStore.svelte"
+
+    
+    import { qr as svgQR } from '@svelte-put/qr/svg';
+	  import SvgQR from '@svelte-put/qr/svg/QR.svelte';
+
+    import {v4 as uuidv4} from 'uuid';
+	  import type { Models } from 'node-appwrite';
+
+    // let uuid = $state(uuidv4())
+    let uuid = $state("09c568s-b171-4f4d-a196-9b02dbcf74bf")
+    let data = $derived(`${page.url.origin}/?uuid=${uuid}`)
+    const img_url = 'https://aw2.aloiz.ch/v1/storage/buckets/public/files/ares/view?project=justfiles&project=justfiles&mode=admin'
+
+
+
 
     let email = $state('');
     let password = $state('');
 
     let waiting = $state(false)
+    let store = $state(new PublicDocStore(PUBLIC_COLL_ID, RECORD_ID))
+    
+    let has_update = $derived.by(()=>{
+      if (store.doc != null){
+        return store.doc.has_update
+      }
+      return false
+    })
+    function triggerReload(){
+      const origin = page.url.origin
+      const new_url = origin+`?req_secret_with_uuid=${uuid}`
+      window.location.href = new_url
+    }
+    onDestroy(()=>{
+      store.clear()
+      console.log("destroy login compoenent triggered")
+    })
+    // import { page } from '$app/state';
+    $effect(()=>{
+      console.log("my uuid is "+uuid)
+        if (has_update){
+          console.log('update found. triggering reload.')
+          triggerReload()
+        }
+        let s = page.data
+        const token: Models.Token = s['secret']
+        if (token){
+          console.log(token)
+          loginWithToken(token)
+        }else{
+          // console.log("empty")
+        }
+    })
     /**
      * Selects an update item.
      * @param {MouseEvent | KeyboardEvent | SubmitEvent} event
      */
-    async function btnPressed(event){
+    async function btnPressed(event: MouseEvent | KeyboardEvent | SubmitEvent){
       // Animation logic (keep as is)
       if (event?.currentTarget && event.currentTarget instanceof HTMLElement) {
             const el = event.currentTarget;
@@ -45,6 +96,9 @@
              text-gray-900 dark:text-gray-100">
           Sign in to your account
         </h2>
+      </div>
+      <div>
+        <SvgQR {data} logo={img_url}/>
       </div>
       <form class="mt-8 space-y-6" onsubmit={(event) => btnPressed(event)}>
         <input type="hidden" name="remember" value="true">
